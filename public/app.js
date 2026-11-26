@@ -61,15 +61,20 @@
     if (form.dataset.setup === '1') return; // already wired — do nothing
     form.dataset.setup = '1';
 
-    let formStartedFired = false;
+    // Persist the flag in sessionStorage so it survives page refreshes
+    // within the same tab session and can never fire more than once per session.
+    const STARTED_KEY = 'sc_form_started';
 
-    // Fire form_started on first focus of any field
+    // Fire form_started on first focus of any field — at most once per session
     form.querySelectorAll('input, textarea').forEach(el => {
       el.addEventListener('focus', () => {
-        if (!formStartedFired) {
-          formStartedFired = true;
-          postEvent('form_started');
+        try {
+          if (sessionStorage.getItem(STARTED_KEY)) return;
+          sessionStorage.setItem(STARTED_KEY, '1');
+        } catch (_) {
+          // sessionStorage unavailable — fall back to in-memory guard below
         }
+        postEvent('form_started');
       }, { once: false });
     });
 
