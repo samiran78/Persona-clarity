@@ -1,0 +1,55 @@
+{
+  "source": "Sonia's public LinkedIn profile, copied manually by the candidate",
+  "profileUrl": "https://www.linkedin.com/in/soniaspecialist/",
+  "name": "Sonia",
+  "headline": "Fractional CMO | Crafting Brands People Can Feel | Human Messaging, Clear Strategy & Meaningful Growth | Guiding Teams & Founders to Think Better",
+  "location": "Gurugram, Haryana, India",
+  "quotes": [
+    "I notice what others don't. The gaps, the confusion, the unspoken story, and I help make sense of it.",
+    "I don't believe in complicating things.",
+    "I bring structure without chaos."
+  ],
+  "nodes": [
+    {
+      "id": "gaps",
+      "title": "Noticing the gaps",
+      "text": "In her words: she notices the gaps, the confusion and the unspoken story, and helps make sense of it."
+    },
+    {
+      "id": "wholepicture",
+      "title": "The whole picture",
+      "text": "She says her strength is seeing how brand affects revenue, how messaging affects conversion, how operations affect execution, and how people affect everything."
+    },
+    {
+      "id": "teams",
+      "title": "Building teams",
+      "text": "At Appirio she built the Jaipur Marketing Center with 15 team members. At Lasersec she led a team of 20+ marketing professionals."
+    },
+    {
+      "id": "demand",
+      "title": "Driving demand",
+      "text": "Her profile states that at ShowMeLeads (2014) demand generation work drove 1,200 new opportunities and 100 closed deals."
+    },
+    {
+      "id": "sharing",
+      "title": "Sharing openly",
+      "text": "She offers free consultancy to help startups become modern marketers, and published research on free social media tools for small businesses and startups."
+    },
+    {
+      "id": "today",
+      "title": "Today",
+      "text": "Fractional CMO and advisor. Her profile lists CMO at i-SmokeStack (since 2020) and a fractional CMO role at Datt Mediproducts (since 2020)."
+    },
+    {
+      "id": "roots",
+      "title": "Roots",
+      "text": "B.E. in Electronics & Telecommunication (2002-2006), then marketing and sales management at Symbiosis (2007-2009) and an Executive MBA in Marketing at IIM Bangalore (2007-2008). Early marketing roles at Bosch and FARO."
+    }
+  ],
+  "services": ["Marketing Strategy", "Brand Marketing", "Brand Consulting", "Content Strategy", "Email Marketing", "Demand Generation", "Leadership Development", "Team Building", "Training", "Management Consulting"],
+  "notes": [
+    "The brief calls her the founder, but her LinkedIn lists her as Fractional CMO and as CMO at i-SmokeStack. Use LinkedIn wording on the page.",
+    "HubSpot certifications on her profile are marked expired. Do not present them as current.",
+    "The Appirio company-value growth figure on her profile is a placeholder ($X to $5X). Do not use it as a number."
+  ]
+}
