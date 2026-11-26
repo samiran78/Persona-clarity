@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,12 @@
   <title>Sonia — Fractional CMO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
+
 <body>
   <main id="stage" class="stage">
     <div class="ambient-glow" aria-hidden="true"></div>
@@ -30,11 +34,55 @@
         <p id="ending-quote" class="ending-quote"></p>
         <p id="ending-identity" class="ending-identity"></p>
         <p id="ending-headline" class="ending-headline"></p>
+
+        <!-- Connect form -->
+        <div class="connect-wrap">
+          <p class="connect-prompt">What's the gap you're noticing?</p>
+
+          <form id="connect-form" class="connect-form" novalidate>
+            <!-- Honeypot: hidden from real users, visible to bots -->
+            <div class="hp-field" aria-hidden="true">
+              <label for="cf-website">Leave this empty</label>
+              <input type="text" id="cf-website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
+            <div class="cf-row">
+              <label class="cf-label" for="cf-name">Name</label>
+              <input class="cf-input" type="text" id="cf-name" name="name" autocomplete="name" maxlength="80" required>
+            </div>
+
+            <div class="cf-row">
+              <label class="cf-label" for="cf-email">Email</label>
+              <input class="cf-input" type="email" id="cf-email" name="email" autocomplete="email" maxlength="254"
+                required>
+            </div>
+
+            <div class="cf-row">
+              <label class="cf-label" for="cf-message">Message</label>
+              <textarea class="cf-input cf-textarea" id="cf-message" name="message" rows="3" maxlength="1000"
+                required></textarea>
+            </div>
+
+            <div id="connect-error" class="connect-error" role="alert" aria-live="polite" hidden></div>
+
+            <button class="cf-submit" type="submit">Send</button>
+          </form>
+
+          <div id="connect-success" class="connect-success" role="status" aria-live="polite" hidden>
+            <p>Thanks, your message was received.</p>
+          </div>
+
+          <p class="privacy-note">Anonymous interaction data is recorded. Messages are only stored for this challenge.
+          </p>
+        </div>
+        <!-- /Connect form -->
+
         <a id="ending-link" class="ending-link" target="_blank" rel="noopener noreferrer">Connect on LinkedIn</a>
       </div>
     </section>
 
-    <article id="node-card" class="node-card" role="dialog" aria-modal="false" aria-labelledby="card-title" aria-hidden="true" hidden>
+    <article id="node-card" class="node-card" role="dialog" aria-modal="false" aria-labelledby="card-title"
+      aria-hidden="true" hidden>
       <button id="card-close" class="card-close" type="button" aria-label="Close">&times;</button>
       <h2 id="card-title" class="card-title"></h2>
       <p id="card-text" class="card-text"></p>
@@ -50,4 +98,5 @@
 
   <script src="/app.js" defer></script>
 </body>
+
 </html>

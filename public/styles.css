@@ -259,9 +259,11 @@ body {
   pointer-events: auto;
   max-width: 32rem;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 1.2rem 1.6rem 1.4rem;
   border-radius: 16px;
-  background: rgba(6, 10, 19, 0.92);   /* more opaque so it never bleeds through */
+  background: rgba(6, 10, 19, 0.92);
   border: 1px solid var(--surface-border);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -477,6 +479,164 @@ body {
     left: 1rem;
     right: 1rem;
     bottom: 0.85rem;
+  }
+}
+
+/* ── Connect form ─────────────────────────────────────────────────────────── */
+
+/* Honeypot: visually hidden, not in tab order */
+.hp-field {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.connect-wrap {
+  margin-top: 1.1rem;
+  text-align: left;
+}
+
+.connect-prompt {
+  margin: 0 0 0.9rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1rem, 2.4vw, 1.25rem);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.connect-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.cf-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.cf-label {
+  font-size: 0.74rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.cf-input {
+  width: 100%;
+  padding: 0.52rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(236, 232, 224, 0.15);
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.4;
+  outline: none;
+  transition: border-color 0.35s var(--ease-calm), background 0.35s var(--ease-calm);
+  /* prevent iOS zoom on focus */
+  font-size: max(16px, 0.9rem);
+}
+
+.cf-input:focus {
+  border-color: rgba(230, 184, 125, 0.5);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.cf-input::placeholder {
+  color: var(--text-muted);
+}
+
+.cf-textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.connect-error {
+  font-size: 0.82rem;
+  color: #e88c7a;
+  margin-top: 0.1rem;
+  line-height: 1.4;
+}
+
+.cf-submit {
+  align-self: flex-start;
+  margin-top: 0.3rem;
+  padding: 0.52rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(230, 184, 125, 0.45);
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background-color 0.4s var(--ease-calm),
+              border-color 0.4s var(--ease-calm),
+              color 0.4s var(--ease-calm);
+}
+
+.cf-submit:hover,
+.cf-submit:focus-visible {
+  background-color: rgba(230, 184, 125, 0.12);
+  border-color: var(--accent);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.cf-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.connect-success {
+  margin-top: 0.6rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  background: rgba(230, 184, 125, 0.09);
+  border: 1px solid rgba(230, 184, 125, 0.25);
+  font-size: 0.88rem;
+  color: var(--accent);
+  text-align: center;
+}
+
+.connect-success p {
+  margin: 0;
+}
+
+.privacy-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Keep LinkedIn link visually separated from form */
+.ending-link {
+  margin-top: 1rem;
+}
+
+/* ── Responsive tweaks for the form ──────────────────────────────────────── */
+@media (max-width: 639px) {
+  .connect-prompt {
+    font-size: 1rem;
+  }
+
+  .cf-submit {
+    align-self: stretch;
+    text-align: center;
   }
 }
 

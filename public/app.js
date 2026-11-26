@@ -1,4 +1,144 @@
 (() => {
+  // ── Session & analytics ────────────────────────────────────────────────────
+  const SESSION_ID = (() => {
+    try {
+      let id = sessionStorage.getItem('sc_session');
+      if (!id) {
+        id = crypto.randomUUID();
+        sessionStorage.setItem('sc_session', id);
+      }
+      return id;
+    } catch (_) {
+      return crypto.randomUUID();
+    }
+  })();
+
+  function postEvent(type, data = {}) {
+    try {
+      fetch('/api/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: SESSION_ID, type, data }),
+        keepalive: true
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
+  // Send landed immediately
+  postEvent('landed');
+
+  // Throttle fog-progress to 25 / 50 / 70 / 100 milestones
+  const fogMilestones = new Set();
+
+  document.addEventListener('fog-progress', (e) => {
+    const pct = e.detail?.percent ?? 0;
+    for (const ms of [25, 50, 70, 100]) {
+      if (pct >= ms && !fogMilestones.has(ms)) {
+        fogMilestones.add(ms);
+        postEvent('fog_progress', { percent: ms });
+      }
+    }
+  });
+
+  document.addEventListener('node-open', (e) => {
+    postEvent('node_open', { id: e.detail?.id });
+  });
+
+  document.addEventListener('page-complete', () => {
+    postEvent('page_complete');
+  });
+
+  // ── Form setup ─────────────────────────────────────────────────────────────
+  // Idempotent: marks the form with data-setup on first call and returns early
+  // on any subsequent call, so multiple invocations from setupScene /
+  // applyReducedMotionView never attach duplicate listeners.
+  function setupConnectForm() {
+    const form       = document.getElementById('connect-form');
+    const errorEl    = document.getElementById('connect-error');
+    const successEl  = document.getElementById('connect-success');
+
+    if (!form) return;
+    if (form.dataset.setup === '1') return; // already wired — do nothing
+    form.dataset.setup = '1';
+
+    let formStartedFired = false;
+
+    // Fire form_started on first focus of any field
+    form.querySelectorAll('input, textarea').forEach(el => {
+      el.addEventListener('focus', () => {
+        if (!formStartedFired) {
+          formStartedFired = true;
+          postEvent('form_started');
+        }
+      }, { once: false });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name    = form.querySelector('#cf-name').value.trim();
+      const email   = form.querySelector('#cf-email').value.trim();
+      const message = form.querySelector('#cf-message').value.trim();
+      const website = form.querySelector('#cf-website').value;
+      const submit  = form.querySelector('.cf-submit');
+
+      // Clear any previous feedback before each attempt
+      hideError();
+      successEl.hidden = true;
+
+      // Client-side validation for a helpful first response
+      if (!name || name.length > 80) {
+        showError('Please enter your name (1–80 characters).'); return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        showError('Please enter a valid email address.'); return;
+      }
+      if (!message || message.length > 1000) {
+        showError('Please write a message (1–1000 characters).'); return;
+      }
+
+      // Disable while request is in flight to prevent double submits
+      submit.disabled = true;
+
+      try {
+        const res = await fetch('/api/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, message, sessionId: SESSION_ID, website })
+        });
+        const json = await res.json().catch(() => ({ ok: false, error: 'Unexpected response.' }));
+
+        if (res.status === 429) {
+          showError('Please wait a moment and try again.');
+          submit.disabled = false;
+          return;
+        }
+
+        if (json.ok) {
+          postEvent('form_submitted');
+          form.hidden = true;
+          successEl.hidden = false;
+        } else {
+          showError(json.error || 'Something went wrong. Please try again.');
+          submit.disabled = false;
+        }
+      } catch (_) {
+        showError('Could not reach the server. Please check your connection and try again.');
+        submit.disabled = false;
+      }
+    });
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.hidden = false;
+    }
+    function hideError() {
+      errorEl.hidden = true;
+      errorEl.textContent = '';
+    }
+  }
+
+  // ── Visual layout constants ────────────────────────────────────────────────
   const DESKTOP_LAYOUT = {
     roots:        { x: 0.16, y: 0.48 },
     gaps:         { x: 0.22, y: 0.18 },
@@ -245,6 +385,9 @@
     });
 
     requestAnimationFrame(tick);
+
+    // Wire the connect form once the scene is ready
+    setupConnectForm();
   }
 
   function applyReducedMotionView() {
@@ -263,6 +406,7 @@
     endingEl.setAttribute('aria-hidden', 'false');
     dispatchAnalytics('fog-progress', { percent: 100 });
     dispatchAnalytics('page-complete', { percent: 100 });
+    setupConnectForm();
   }
 
   function attachNodeListeners(btn, item) {
@@ -682,6 +826,9 @@
     renderFog(now / 1000);
 
     requestAnimationFrame(tick);
+
+    // Wire the connect form once the scene is ready
+    setupConnectForm();
   }
 
   function setPointerPosition(clientX, clientY) {
