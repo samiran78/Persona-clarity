@@ -269,6 +269,27 @@ body {
   -webkit-backdrop-filter: blur(14px);
   text-align: center;
   box-shadow: 0 20px 56px rgba(0, 0, 0, 0.6);
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(230, 184, 125, 0.35) transparent;
+}
+
+/* Chromium / Safari */
+.ending-inner::-webkit-scrollbar {
+  width: 4px;
+}
+
+.ending-inner::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ending-inner::-webkit-scrollbar-thumb {
+  background-color: rgba(230, 184, 125, 0.35);
+  border-radius: 999px;
+}
+
+.ending-inner::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(230, 184, 125, 0.6);
 }
 
 .ending-quote {
