@@ -132,22 +132,34 @@ app.get('/stats', async (req, res) => {
   }
 
   try {
-    // Aggregate funnel counts
-    const funnelStages = ['landed', 'fog_progress', 'node_open', 'form_started', 'form_submitted', 'page_complete'];
+    // ── Funnel: distinct sessions per stage ──────────────────────────────────
+    // Each stage counts how many unique sessionIds have at least one event of
+    // that type, so the numbers are sessions not raw event counts.
+    const funnelStages = ['landed', 'node_open', 'form_started', 'form_submitted', 'page_complete'];
 
     const funnelCounts = await Promise.all(
-      funnelStages.map(t => Event.countDocuments({ type: t }))
+      funnelStages.map(t =>
+        Event.distinct('sessionId', { type: t }).then(ids => ids.length)
+      )
     );
 
-    // Sessions that cleared 25 / 50 / 70 % fog milestones
-    const fog25 = await Event.countDocuments({ type: 'fog_progress', 'data.percent': { $gte: 25 } });
-    const fog50 = await Event.countDocuments({ type: 'fog_progress', 'data.percent': { $gte: 50 } });
-    const fog70 = await Event.countDocuments({ type: 'fog_progress', 'data.percent': { $gte: 70 } });
+    // ── Fog milestones: sessions whose highest fog% reached each threshold ───
+    // Build one aggregation that gets the per-session max, then count in JS.
+    const fogPeaks = await Event.aggregate([
+      { $match: { type: 'fog_progress', 'data.percent': { $exists: true } } },
+      { $group: { _id: '$sessionId', maxPct: { $max: '$data.percent' } } }
+    ]);
+    const fog25 = fogPeaks.filter(r => r.maxPct >= 25).length;
+    const fog50 = fogPeaks.filter(r => r.maxPct >= 50).length;
+    const fog70 = fogPeaks.filter(r => r.maxPct >= 70).length;
+    const avgFog = fogPeaks.length
+      ? (fogPeaks.reduce((s, r) => s + r.maxPct, 0) / fogPeaks.length).toFixed(1)
+      : 'n/a';
 
-    // Total unique sessions
+    // ── Total unique sessions ────────────────────────────────────────────────
     const totalSessions = (await Event.distinct('sessionId')).length;
 
-    // Most-opened nodes
+    // ── Most-opened nodes (by distinct sessions, not raw opens) ─────────────
     const nodeOpenings = await Event.aggregate([
       { $match: { type: 'node_open' } },
       { $group: { _id: '$data.id', count: { $sum: 1 } } },
@@ -155,29 +167,21 @@ app.get('/stats', async (req, res) => {
       { $limit: 10 }
     ]);
 
-    // Average fog cleared (highest percent per session)
-    const avgFogResult = await Event.aggregate([
-      { $match: { type: 'fog_progress', 'data.percent': { $exists: true } } },
-      { $group: { _id: '$sessionId', maxPct: { $max: '$data.percent' } } },
-      { $group: { _id: null, avg: { $avg: '$maxPct' } } }
-    ]);
-    const avgFog = avgFogResult.length ? avgFogResult[0].avg.toFixed(1) : 'n/a';
-
-    // Last 20 messages
+    // ── Last 20 messages ─────────────────────────────────────────────────────
     const messages = await Message.find({})
       .sort({ createdAt: -1 })
       .limit(20)
       .lean();
 
     const funnelRows = [
-      ['Landed', funnelCounts[0]],
-      ['Cleared 25% fog', fog25],
-      ['Cleared 50% fog', fog50],
-      ['Cleared 70% fog', fog70],
-      ['Opened a node', funnelCounts[2]],
-      ['Started form', funnelCounts[3]],
-      ['Submitted form', funnelCounts[4]],
-      ['Page complete', funnelCounts[5]],
+      ['Landed',           funnelCounts[0]],
+      ['Cleared 25% fog',  fog25],
+      ['Cleared 50% fog',  fog50],
+      ['Cleared 70% fog',  fog70],
+      ['Opened a node',    funnelCounts[1]],
+      ['Started form',     funnelCounts[2]],
+      ['Submitted form',   funnelCounts[3]],
+      ['Page complete',    funnelCounts[4]],
     ];
 
     const nodeRows = nodeOpenings.map(n =>
@@ -213,7 +217,7 @@ app.get('/stats', async (req, res) => {
   <p class="meta">Total sessions: <strong>${totalSessions}</strong> &nbsp;|&nbsp; Average fog cleared: <strong>${avgFog}%</strong></p>
 
   <h2>Funnel</h2>
-  <table><thead><tr><th>Stage</th><th>Events</th></tr></thead><tbody>
+  <table><thead><tr><th>Stage</th><th>Sessions</th></tr></thead><tbody>
     ${funnelRows.map(([s, c]) => `<tr><td>${s}</td><td>${c}</td></tr>`).join('')}
   </tbody></table>
 
@@ -221,7 +225,7 @@ app.get('/stats', async (req, res) => {
   <table><thead><tr><th>Node</th><th>Opens</th></tr></thead><tbody>${nodeRows || '<tr><td colspan="2">No data yet</td></tr>'}</tbody></table>
 
   <h2>Last 20 messages</h2>
-  <table><thead><tr><th>Name</th><th>Email</th><th>Message</th><th>Sent</th></tr></thead><tbody>
+  <table><thead><tr><th>Name</th><th>Email</th><th>Message</th><th>Sent (UTC)</th></tr></thead><tbody>
     ${msgRows || '<tr><td colspan="4">No messages yet</td></tr>'}
   </tbody></table>
 </body>

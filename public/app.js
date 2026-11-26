@@ -62,8 +62,9 @@
     form.dataset.setup = '1';
 
     // Persist the flag in sessionStorage so it survives page refreshes
-    // within the same tab session and can never fire more than once per session.
+    // within the same tab session and fires at most once per session.
     const STARTED_KEY = 'sc_form_started';
+    let startedInMemory = false; // fallback if sessionStorage is unavailable
 
     // Fire form_started on first focus of any field — at most once per session
     form.querySelectorAll('input, textarea').forEach(el => {
@@ -72,7 +73,9 @@
           if (sessionStorage.getItem(STARTED_KEY)) return;
           sessionStorage.setItem(STARTED_KEY, '1');
         } catch (_) {
-          // sessionStorage unavailable — fall back to in-memory guard below
+          // sessionStorage unavailable — use in-memory flag
+          if (startedInMemory) return;
+          startedInMemory = true;
         }
         postEvent('form_started');
       }, { once: false });
